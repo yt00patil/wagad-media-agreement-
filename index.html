@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wagad Media | Digital Agreement</title>
+<style>
+body{margin:0;background:#f4f4f5;font-family:Arial,sans-serif;color:#111}.wrap{max-width:700px;margin:auto;padding:14px}.card{background:#fff;border-radius:16px;padding:20px;margin:12px 0;box-shadow:0 6px 24px #00000010}h1{text-align:center;margin:4px}.sub{text-align:center;color:#666;font-size:13px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.box{background:#f7f7f7;padding:12px;border-radius:10px}.box small{display:block;color:#666}.box b{font-size:17px}label{display:block;font-size:13px;font-weight:bold;margin:10px 0 5px}input{width:100%;padding:11px;border:1px solid #ccc;border-radius:9px;box-sizing:border-box;font-size:15px}ul{line-height:1.65;padding-left:20px}canvas{width:100%;height:180px;border:2px dashed #bbb;border-radius:10px;touch-action:none}.check{display:flex;gap:8px;margin:13px 0;font-size:14px;line-height:1.4}.check input{width:auto;margin-top:3px}button{border:0;border-radius:10px;padding:13px 16px;font-weight:bold;cursor:pointer}.clear{background:#eee}.sign{background:#111;color:#fff;width:100%;margin-top:10px}.ok{text-align:center;display:none}.ok h2{color:#15803d}.note{font-size:12px;color:#777;text-align:center}@media(max-width:560px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body><div class="wrap">
+<div class="card"><h1>WAGAD MEDIA</h1><div class="sub">Digital Marketing & Creative Services</div></div>
+<div id="form">
+<div class="card"><h2>100 Reels Editing Agreement</h2>
+<div class="grid"><div class="box"><small>Service</small><b>Reel Editing Only</b></div><div class="box"><small>Quantity</small><b>100 Reels</b></div><div class="box"><small>Rate</small><b>₹250 / Reel</b></div><div class="box"><small>Total</small><b>₹25,000</b></div></div></div>
+<div class="card"><h2>Client Details</h2>
+<label>Full Name *</label><input id="name" required>
+<label>Mobile / Email *</label><input id="contact" required>
+<label>Business / Page Name</label><input id="business">
+<div class="grid">
+<div><label>Advance Paid (₹)</label><input id="advance" type="number" min="0" max="25000" placeholder="e.g. 5000"></div>
+<div><label>Balance Amount (₹)</label><input id="balance" value="25000" readonly></div>
+</div>
+</div>
+<div class="card"><h2>Terms</h2><ul>
+<li>100 reels editing at ₹250 per reel.</li><li>Up to 2 revisions per reel for the same requirement.</li>
+<li>Client provides raw footage, logos, text, music/assets and references.</li>
+<li>Shooting, voice-over, posters, paid ads and other services are not included.</li>
+<li>Major changes or extra work outside the agreed brief may be charged separately.</li>
+<li>Total agreed amount: ₹25,000.</li></ul></div>
+<div class="card"><h2>Digital Signature</h2><p>Sign with your finger or mouse:</p>
+<canvas id="sig"></canvas><button class="clear" onclick="clearSig()">Clear</button>
+<label class="check"><input type="checkbox" id="agree"> <span>I have read and agree to the above terms.</span></label>
+<button class="sign" onclick="submitAgreement()">✓ Accept & Sign Agreement</button>
+<p class="note">Your name, contact, acceptance time and signature will be securely submitted to Wagad Media.</p>
+</div></div>
+<div id="ok" class="card ok"><h2>✓ Agreement Accepted</h2><p id="msg"></p><p>You may close this page now.</p></div>
+</div>
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbz1dIBGNYZRS4-CDuEocx0LxCvMQFoZxbwbYhpGLZYTNTlrVLpr3K92mA-1sliuDuc/exec";
+const c=document.getElementById("sig"),x=c.getContext("2d");let drawing=false,hasSig=false;
+function resize(){let r=c.getBoundingClientRect(),d=devicePixelRatio||1;c.width=r.width*d;c.height=r.height*d;x.setTransform(d,0,0,d,0,0);x.lineWidth=2.2;x.lineCap="round";x.strokeStyle="#111"} resize();addEventListener("resize",resize);
+function p(e){let r=c.getBoundingClientRect(),q=e.touches?e.touches[0]:e;return{x:q.clientX-r.left,y:q.clientY-r.top}}
+function st(e){e.preventDefault();drawing=hasSig=true;x.beginPath();let q=p(e);x.moveTo(q.x,q.y)}
+function mv(e){if(!drawing)return;e.preventDefault();let q=p(e);x.lineTo(q.x,q.y);x.stroke()}
+function en(){drawing=false}
+c.onmousedown=st;c.onmousemove=mv;c.onmouseup=en;c.onmouseleave=en;c.ontouchstart=st;c.ontouchmove=mv;c.ontouchend=en;
+function clearSig(){x.clearRect(0,0,c.width,c.height);hasSig=false}
+document.getElementById("advance").addEventListener("input",()=>{
+ let a=Number(document.getElementById("advance").value||0);
+ if(a<0)a=0;if(a>25000)a=25000;
+ document.getElementById("balance").value=(25000-a).toFixed(0);
+});
+async function submitAgreement(){
+ let name=document.getElementById("name").value.trim(),contact=document.getElementById("contact").value.trim(),business=document.getElementById("business").value.trim();
+ if(!name||!contact)return alert("Please enter name and mobile/email.");
+ if(!hasSig)return alert("Please add your signature.");
+ if(!document.getElementById("agree").checked)return alert("Please tick the agreement checkbox.");
+ if(!API_URL.startsWith("https://"))return alert("Website setup is incomplete: add the Google Apps Script Web App URL.");
+ const btn=document.querySelector(".sign");btn.disabled=true;btn.textContent="Submitting...";
+ const advance=Math.max(0,Math.min(25000,Number(document.getElementById("advance").value||0)));
+ const balance=25000-advance;
+ const payload={name,contact,business,advancePaid:advance,balanceAmount:balance,signature:c.toDataURL("image/png"),acceptedAt:new Date().toISOString(),userAgent:navigator.userAgent};
+ try{
+   const res=await fetch(API_URL,{method:"POST",mode:"cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});
+   const data=await res.json();
+   if(!data.ok)throw new Error(data.error||"Submission failed");
+   document.getElementById("form").style.display="none";document.getElementById("ok").style.display="block";
+   document.getElementById("msg").textContent="Thank you, "+name+". Your signed agreement has been recorded.";
+ }catch(e){alert("Could not submit. Please try again or contact Wagad Media.");btn.disabled=false;btn.textContent="✓ Accept & Sign Agreement"}
+}
+</script></body></html>
